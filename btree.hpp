@@ -86,19 +86,23 @@ class BTree
 	}
 	
 	void insert (keyType key){
+		cout<<"Now inserting "<<key<<endl;
 		if(this->root.currSize < 1){
-			printf("Initial insertion\n");
+			// printf("Initial insertion\n");
 			this->root.currSize++;
 			this->root.contents[0] = key;
 			putNode(this->rootAddr, this->root);
 			return;
 		}
-		printf("insert\n");
+		// printf("insert\n");
 		bool split;
 		int newNodeAddr=0;
 		int j;
 		insert(key, this->rootAddr, split, newNodeAddr);
+		// printf("\nnewNodeAddr(Right of root): %d\n", newNodeAddr);
 		if(split){
+			cout<<"Now Adjusting Root!"<<endl;
+			this->height++;
 			BTNode<keyType> newRoot;
 			newRoot.currSize=1;
 			newRoot.contents[0] = key;
@@ -138,7 +142,7 @@ class BTree
 	}
 	
 	int getHeight(){
-
+		return this->height;
 	}
 	
 	bool search (string key){
@@ -178,7 +182,7 @@ void printTree (int rootAddr){
 	printNode(rootAddr);
 	for(int i=0; i<temp.currSize+1;i++){
 		if(temp.child[i] > -1){
-			printf("temp.child[i]: %d\t",temp.child[i]);
+			// printf("temp.child[i]: %d\t",temp.child[i]);
 			printTree(temp.child[i]);
 		}
 	}
@@ -188,14 +192,14 @@ void inorder (int addr){
 	BTNode<keyType> temp = getNode(addr);
 	for(int i=0;i<temp.currSize;i++){
 		if(temp.child[i] > -1){//if we have child to left of value, print those first
-			printf("recursion\n\n\n");
+			// printf("recursion\n\n\n");
 			inorder(temp.child[i]);
 		}
 		cout<<temp.contents[i];
 		printf("\n");
 	}
 	if(temp.child[temp.currSize] > -1){			
-		printf("recursion\n\n\n");
+		// printf("recursion\n\n\n");
 		inorder(temp.child[temp.currSize]);//check the last child (to the right of last content)
 	}
 }
@@ -209,12 +213,12 @@ int findpAddr(keyType key, BTNode<keyType> t, int tAddr){
 
 }
 
-void insert(keyType &key, int currAddr, bool &split, int newNodeAddr){
+void insert(keyType &key, int currAddr, bool &split, int &newNodeAddr){
 	if(isLeaf(currAddr)){
-		printf("LEAF\t");
+		// printf("LEAF\t");
 		BTNode<keyType> currentNode = getNode(currAddr);
 		if(currentNode.currSize < MAX_CONTENTS){//there is space
-			printf("currSize < MAX_CONTENTS: %d\n",currentNode.currSize);
+			// printf("currSize < MAX_CONTENTS: %d\n",currentNode.currSize);
 			split=false;
 			bool b=false;
 			int i;
@@ -246,7 +250,7 @@ void insert(keyType &key, int currAddr, bool &split, int newNodeAddr){
 	}
 	else{//we split the one below us, now we might need to
 		BTNode<keyType> currentNode = getNode(currAddr);
-		printf("NOT LEAF\t");
+		// printf("NOT LEAF\t");
 		int j;
 		for(j=0;j<currentNode.currSize;j++){
 			if(key < currentNode.contents[j]){
@@ -254,11 +258,11 @@ void insert(keyType &key, int currAddr, bool &split, int newNodeAddr){
 			}
 		}
 		insert(key, currentNode.child[j], split, newNodeAddr);
-		printf("%d, %d, %d\n",currAddr,split,newNodeAddr);
+		// printf("%d, %d, %d\n",currAddr,split,newNodeAddr);
 		if(split){
-			printf("split\t");
+			// printf("split\t");
 			if(currentNode.currSize < MAX_CONTENTS){
-				printf("currSize < MAX_CONTENTS: %d\n",currentNode.currSize);
+				// printf("currSize < MAX_CONTENTS: %d\n",currentNode.currSize);
 				bool b = false;
 				split=false;
 				int i;
@@ -324,7 +328,7 @@ void placeNode (keyType k,int currAddr,int oneAddr,int twoAddr){
 
 }
 void putNode(int recAddr, BTNode<keyType> node){
-	printf("putNode, node.currSize: %d, %d\n",recAddr,node.currSize);
+	// printf("putNode, node.currSize: %d, %d\n",recAddr,node.currSize);
 	this->treeFile->seekp(ios_base::beg + recAddr*sizeof(BTNode<keyType>));
 	this->treeFile->write((char*) &node, sizeof(BTNode<keyType>));
 }
@@ -335,9 +339,9 @@ bool isLeaf (int recAddr){
 //Check if the given node is a leaf
 //
 bool isLeaf(BTNode<keyType> t){
-	printf("isLeaf, %d\n",t.currSize);
+	// printf("isLeaf, %d\n",t.currSize);
 	for(int i=0;i<t.currSize+1;i++){//one more than current size since you can one more link than items contained
-		printf("%d, ",i);
+		// printf("%d, ",i);
 		if(t.child[i] > -1){
 			
 			return false;
@@ -353,7 +357,7 @@ void adjRoot (keyType rootElem, int oneAddr, int twoAddr){
 
 }
 void splitNode (keyType& key,int recAddr, int &newNodeAddr){
-	printf("Splitting\n\n");
+	printf("Now Splitting!\n");
 	BTNode<keyType> currentNode = getNode(recAddr);
 	
 	keyType temp1;
@@ -373,6 +377,7 @@ void splitNode (keyType& key,int recAddr, int &newNodeAddr){
 		newNode.child[i+ ORDER/2 +1] = -1;
 		currentNode.child[i+ ORDER/2 +1] = -1;
 	}
+
 	// printf("\nnewNode\n");
 	// for(int i=0;i<ORDER;i++){
 	// 	printf("child[%d]: %d    ",i,newNode.child[i]);
@@ -386,7 +391,9 @@ void splitNode (keyType& key,int recAddr, int &newNodeAddr){
 	newNode.child[ORDER/2] = -1;//remove the extra child from the right side
 	putNode(this->size, newNode);
 	putNode(recAddr, currentNode);
+
 	newNodeAddr = this->size;
+	printf("newNodeAddr: %d\n",newNodeAddr);
 	this->size++;
 
 

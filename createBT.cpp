@@ -36,13 +36,13 @@ int main(int c, char * v[]){
 		infile>>temp;
 		if(!infile)
 			break;
-		cout<<temp<<endl;
+		// cout<<temp<<endl;
 		bt->insert(temp);
-		bt->printTree();
-		printf("\n\n\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n\n");
+		// bt->printTree();
 	}
-	
-	// bt->inorder();
+	printf("\n\n\n\n~~~~~~~~~~~~~~B-tree of height %d~~~~~~~~~~~~~~~~~~\n\n\n\n",bt->getHeight());
+
+	bt->printTree();
 	// bt->insert(a);
 	// bt->inorder();
 	return 0;
