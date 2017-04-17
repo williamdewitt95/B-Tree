@@ -1,0 +1,4 @@
+createBT album.baby tree.ind
+tree.ind has to already exist
+
+updateBT tree.ind trans1.dat

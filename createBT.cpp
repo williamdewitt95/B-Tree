@@ -38,10 +38,11 @@ int main(int c, char * v[]){
 			break;
 		cout<<temp<<endl;
 		bt->insert(temp);
-
+		bt->printTree();
+		printf("\n\n\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n\n");
 	}
 	
-	bt->inorder();
+	// bt->inorder();
 	// bt->insert(a);
 	// bt->inorder();
 	return 0;
