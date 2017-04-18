@@ -304,11 +304,11 @@ void insert(keyType &key, int currAddr, bool &split, int &newNodeAddr){
 
 
 BTNode<keyType> getNode (int recAddr){
-	// printf("getNode(%d) myNode.currSize: ",recAddr);
+	printf("getNode(%d) myNode.currSize: ",recAddr);
 	BTNode<keyType> *myNode = new BTNode<keyType>();
 	this->treeFile->seekp(ios_base::beg + recAddr*sizeof(BTNode<keyType>));
 	this->treeFile->read((char*) myNode, sizeof(BTNode<keyType>));
-	// printf("%d\n",myNode->currSize);
+	printf("%d\n",myNode->currSize);
 	return *myNode;
 }
 void printNode(int recAddr){
@@ -329,7 +329,7 @@ void placeNode (keyType k,int currAddr,int oneAddr,int twoAddr){
 }
 void putNode(int recAddr, BTNode<keyType> node){
 	// printf("putNode, node.currSize: %d, %d\n",recAddr,node.currSize);
-	this->treeFile->seekp(ios_base::beg + recAddr*sizeof(BTNode<keyType>));
+	this->treeFile->seekg(ios_base::beg + recAddr*sizeof(BTNode<keyType>));
 	this->treeFile->write((char*) &node, sizeof(BTNode<keyType>));
 }
 //Check if the given node is a leaf
@@ -359,7 +359,8 @@ void adjRoot (keyType rootElem, int oneAddr, int twoAddr){
 void splitNode (keyType& key,int recAddr, int &newNodeAddr){
 	printf("Now Splitting!\n");
 	BTNode<keyType> currentNode = getNode(recAddr);
-	
+	printf("currentNode node contents[4]: ");
+	cout<<currentNode.contents[1 + ORDER/2]<<endl;
 	keyType temp1;
 	keyType temp2 = key;
 	for(int i=0; i<MAX_CONTENTS;i++){
@@ -371,9 +372,14 @@ void splitNode (keyType& key,int recAddr, int &newNodeAddr){
 	}
 	key = currentNode.contents[ORDER/2];
 	BTNode<keyType> newNode = currentNode;//newNode is to the right
+	
 	for(int i=0;i<ORDER/2;i++){
-		newNode.contents[i] = currentNode.contents[i+ ORDER/2 +1];
-		newNode.child[i] = currentNode.child[i+ ORDER/2 +1];
+		newNode.contents[i] = currentNode.contents[i+ ORDER/2];
+		printf("i+ORDER/2+1 = %d\nright node contents[%d]: ",i+ORDER/2,i);
+		cout<<newNode.contents[i]<<endl;
+		printf("currentNode node contents[%d]: ",i+ ORDER/2);
+		cout<<currentNode.contents[i + ORDER/2]<<endl;
+		newNode.child[i] = currentNode.child[i+ ORDER/2];
 		newNode.child[i+ ORDER/2 +1] = -1;
 		currentNode.child[i+ ORDER/2 +1] = -1;
 	}
@@ -393,7 +399,7 @@ void splitNode (keyType& key,int recAddr, int &newNodeAddr){
 	putNode(recAddr, currentNode);
 
 	newNodeAddr = this->size;
-	printf("newNodeAddr: %d\n",newNodeAddr);
+	// printf("newNodeAddr: %d\n",newNodeAddr);
 	this->size++;
 
 
