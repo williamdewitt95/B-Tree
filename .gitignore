@@ -30,3 +30,11 @@
 
 #build folder
 build/
+
+#executables
+myCreateBT
+myUpdateBT
+
+binaries
+tree.ind
+*.ind

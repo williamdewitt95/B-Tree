@@ -290,6 +290,7 @@ void insert(keyType &key, int currAddr, bool &split, int &newNodeAddr){
 				if(i <= MAX_CONTENTS-1 && !b){
 					currentNode.contents[i] = key;
 					currentNode.currSize++;
+					currentNode.child[i+1] = newNodeAddr;
 					putNode(currAddr, currentNode);
 				}
 			}
@@ -304,11 +305,11 @@ void insert(keyType &key, int currAddr, bool &split, int &newNodeAddr){
 
 
 BTNode<keyType> getNode (int recAddr){
-	printf("getNode(%d) myNode.currSize: ",recAddr);
+	// printf("getNode(%d) myNode.currSize: ",recAddr);
 	BTNode<keyType> *myNode = new BTNode<keyType>();
 	this->treeFile->seekp(ios_base::beg + recAddr*sizeof(BTNode<keyType>));
 	this->treeFile->read((char*) myNode, sizeof(BTNode<keyType>));
-	printf("%d\n",myNode->currSize);
+	// printf("%d\n",myNode->currSize);
 	return *myNode;
 }
 void printNode(int recAddr){
@@ -371,18 +372,25 @@ void splitNode (keyType& key,int recAddr, int &newNodeAddr){
 		}
 	}
 	key = currentNode.contents[ORDER/2];
+	cout<<"key that goes to my parent is: \n"<<key<<endl;
 	BTNode<keyType> newNode = currentNode;//newNode is to the right
 	
 	for(int i=0;i<ORDER/2;i++){
-		newNode.contents[i] = currentNode.contents[i+ ORDER/2];
-		printf("i+ORDER/2+1 = %d\nright node contents[%d]: ",i+ORDER/2,i);
-		cout<<newNode.contents[i]<<endl;
-		printf("currentNode node contents[%d]: ",i+ ORDER/2);
-		cout<<currentNode.contents[i + ORDER/2]<<endl;
+		if(i < ORDER/2 -1){
+			newNode.contents[i] = currentNode.contents[i+ ORDER/2 + 1];
+			printf("i+ORDER/2+1 = %d\nright node contents[%d]: ",i+ORDER/2 +1,i);
+			cout<<newNode.contents[i]<<endl;	
+		}
+		
+		// printf("currentNode node contents[%d]: ",i+ ORDER/2);
+		// cout<<currentNode.contents[i + ORDER/2]<<endl;
 		newNode.child[i] = currentNode.child[i+ ORDER/2];
 		newNode.child[i+ ORDER/2 +1] = -1;
 		currentNode.child[i+ ORDER/2 +1] = -1;
 	}
+	newNode.contents[ORDER/2-1] = temp2;
+	printf("\nright node contents[%d]: ",ORDER/2-1);
+	cout<<newNode.contents[ORDER/2-1]<<endl;
 
 	// printf("\nnewNode\n");
 	// for(int i=0;i<ORDER;i++){
@@ -399,7 +407,7 @@ void splitNode (keyType& key,int recAddr, int &newNodeAddr){
 	putNode(recAddr, currentNode);
 
 	newNodeAddr = this->size;
-	// printf("newNodeAddr: %d\n",newNodeAddr);
+	printf("child sent to my parent: %d\n",newNodeAddr);
 	this->size++;
 
 

@@ -13,7 +13,10 @@ OBJS        = album.o createBT.o
 BUILD_OBJS  = $(addprefix $(BUILD_DIR)/, $(OBJS))
 
 .PHONY: all
-all: build myCreateBT 
+all: build myCreateBT tree.ind
+
+tree.ind:
+	touch tree.ind
 
 
 build:
@@ -49,6 +52,7 @@ clean:
 	rm -f $(BUILD_DIR)/*.o
 	rm -f myCreateBT
 	rm -f myUpdateBT
+	rm -f tree.ind
 
 .PHONY: distclean
 distclean: clean
