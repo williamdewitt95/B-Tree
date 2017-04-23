@@ -38,7 +38,7 @@ int main(int c, char * v[]){
 			break;
 		// cout<<temp<<endl;
 		bt->insert(temp);
-		bt->printTree();
+		// bt->printTree();
 		printf("\n\n\n\n\n");
 	}
 	printf("\n\n\n\n~~~~~~~~~~~~~~B-tree of height %d~~~~~~~~~~~~~~~~~~\n\n\n\n",bt->getHeight());
