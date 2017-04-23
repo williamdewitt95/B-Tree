@@ -215,7 +215,7 @@ int findpAddr(keyType key, BTNode<keyType> t, int tAddr){
 
 void insert(keyType &key, int currAddr, bool &split, int &newNodeAddr){
 	if(isLeaf(currAddr)){
-		printf("LEAF\t");
+		// printf("LEAF\t");
 		BTNode<keyType> currentNode = getNode(currAddr);
 		if(currentNode.currSize < MAX_CONTENTS){//there is space
 			// printf("currSize < MAX_CONTENTS: %d\n",currentNode.currSize);
@@ -250,7 +250,7 @@ void insert(keyType &key, int currAddr, bool &split, int &newNodeAddr){
 	}
 	else{//we split the one below us, now we might need to
 		BTNode<keyType> currentNode = getNode(currAddr);
-		printf("NOT LEAF\t");
+		// printf("NOT LEAF\t");
 		int j;
 		for(j=0;j<currentNode.currSize;j++){
 			if(key < currentNode.contents[j]){
@@ -258,11 +258,11 @@ void insert(keyType &key, int currAddr, bool &split, int &newNodeAddr){
 			}
 		}
 		insert(key, currentNode.child[j], split, newNodeAddr);
-		printf("%d, %d, %d\n",currAddr,split,newNodeAddr);
+		// printf("%d, %d, %d\n",currAddr,split,newNodeAddr);
 		if(split){
-			printf("split\t");
+			// printf("split\t");
 			if(currentNode.currSize < MAX_CONTENTS){
-				printf("currSize < MAX_CONTENTS: %d\n",currentNode.currSize);
+				// printf("currSize < MAX_CONTENTS: %d\n",currentNode.currSize);
 				bool b = false;
 				split=false;
 				int i;
@@ -295,37 +295,37 @@ void insert(keyType &key, int currAddr, bool &split, int &newNodeAddr){
 				}
 			}
 			else{
-				printf("\ncurrentNode node child[0]: %d\t",currentNode.child[0]);
-				printf("currentNode node child[1]: %d ",currentNode.child[1]);
-				printf("currentNode node child[2]: %d ",currentNode.child[2]);
-				printf("currentNode node child[3]: %d ",currentNode.child[3]);
-				printf("currentNode node child[4]: %d\n\n",currentNode.child[4]);
-				printf("split again\n");
+				// printf("\ncurrentNode node child[0]: %d\t",currentNode.child[0]);
+				// printf("currentNode node child[1]: %d ",currentNode.child[1]);
+				// printf("currentNode node child[2]: %d ",currentNode.child[2]);
+				// printf("currentNode node child[3]: %d ",currentNode.child[3]);
+				// printf("currentNode node child[4]: %d\n\n",currentNode.child[4]);
+				// printf("split again\n");
 				BTNode<keyType> newNode = getNode(newNodeAddr);
 
-				cout<<key<<"   currAddr: "<<currAddr<<"newNodeAddr: "<<newNodeAddr<<"  "<<newNode.contents[0]<<endl;
+				// cout<<key<<"   currAddr: "<<currAddr<<"newNodeAddr: "<<newNodeAddr<<"  "<<newNode.contents[0]<<endl;
 				split = true;
 				int tempNewNodeAddr = newNodeAddr;
 				splitNode(key, currAddr, newNodeAddr);
-				cout<<"currAddr "<<currAddr<<endl;
+				// cout<<"currAddr "<<currAddr<<endl;
 				currentNode = getNode(currAddr);
 				// currentNode.child[currentNode.currSize+1] = tempNewNodeAddr;
-				printf("temp %d",tempNewNodeAddr);
+				// printf("temp %d",tempNewNodeAddr);
 				putNode(currAddr, currentNode);
-				printNode(currAddr);
+				// printNode(currAddr);
 				newNode = getNode(newNodeAddr);
 				newNode.child[newNode.currSize] = tempNewNodeAddr;
 				putNode(newNodeAddr, newNode);
-				printf("\ncurrentNode node child[0]: %d\t",currentNode.child[0]);
-				printf("curr child[1]: %d ",currentNode.child[1]);
-				printf("curr child[2]: %d ",currentNode.child[2]);
-				printf("curr child[3]: %d ",currentNode.child[3]);
-				printf("curr child[4]: %d\n",currentNode.child[4]);
-				printf("\nnewNode node child[0]: %d\t",newNode.child[0]);
-				printf("new child[1]: %d ",newNode.child[1]);
-				printf("new child[2]: %d ",newNode.child[2]);
-				printf("new child[3]: %d ",newNode.child[3]);
-				printf("new child[4]: %d\n\n",newNode.child[4]);
+				// printf("\ncurrentNode node child[0]: %d\t",currentNode.child[0]);
+				// printf("curr child[1]: %d ",currentNode.child[1]);
+				// printf("curr child[2]: %d ",currentNode.child[2]);
+				// printf("curr child[3]: %d ",currentNode.child[3]);
+				// printf("curr child[4]: %d\n",currentNode.child[4]);
+				// printf("\nnewNode node child[0]: %d\t",newNode.child[0]);
+				// printf("new child[1]: %d ",newNode.child[1]);
+				// printf("new child[2]: %d ",newNode.child[2]);
+				// printf("new child[3]: %d ",newNode.child[3]);
+				// printf("new child[4]: %d\n\n",newNode.child[4]);
 
 			}
 		}
@@ -345,7 +345,7 @@ BTNode<keyType> getNode (int recAddr){
 void printNode(int recAddr){
 	
 	BTNode<keyType> current = getNode(recAddr);
-	cout<<"\tNode of size "<<current.currSize<<endl;
+	cout<<"\t***node of size"<<current.currSize<<"***"<<endl;
 	for(int i=0;i<current.currSize;i++){
 		// if(current.contents[i]){
 			cout<<current.contents[i]<<endl;
@@ -403,14 +403,14 @@ void splitNode (keyType& key,int recAddr, int &newNodeAddr){
 		}
 	}
 	key = currentNode.contents[ORDER/2];
-	cout<<"key that goes to my parent is: \n"<<key<<endl;
+	// cout<<"key that goes to my parent is: \n"<<key<<endl;
 	BTNode<keyType> newNode = currentNode;//newNode is to the right
 	
 	for(int i=0;i<ORDER/2;i++){
 		if(i < ORDER/2 -1){
 			newNode.contents[i] = currentNode.contents[i+ ORDER/2 + 1];
-			printf("i+ORDER/2+1 = %d\nright node contents[%d]: ",i+ORDER/2 +1,i);
-			cout<<newNode.contents[i]<<endl;	
+			// printf("i+ORDER/2+1 = %d\nright node contents[%d]: ",i+ORDER/2 +1,i);
+			// cout<<newNode.contents[i]<<endl;	
 		}
 		
 		// printf("currentNode node contents[%d]: ",i+ ORDER/2);
@@ -420,8 +420,8 @@ void splitNode (keyType& key,int recAddr, int &newNodeAddr){
 		currentNode.child[i+ ORDER/2 +1] = -1;
 	}
 	newNode.contents[ORDER/2-1] = temp2;
-	printf("\nright node contents[%d]: ",ORDER/2-1);
-	cout<<newNode.contents[ORDER/2-1]<<endl;
+	// printf("\nright node contents[%d]: ",ORDER/2-1);
+	// cout<<newNode.contents[ORDER/2-1]<<endl;
 
 	// printf("\nnewNode\n");
 	// for(int i=0;i<ORDER;i++){
@@ -438,7 +438,7 @@ void splitNode (keyType& key,int recAddr, int &newNodeAddr){
 	putNode(recAddr, currentNode);
 
 	newNodeAddr = this->size;
-	printf("child sent to my parent: %d\n",newNodeAddr);
+	// printf("child sent to my parent: %d\n",newNodeAddr);
 	this->size++;
 
 
