@@ -15,26 +15,6 @@ using namespace std;
 #ifndef BTREE_H
 #define BTREE_H
 
-// template<class U>
-// class keyType{
-// public:
-// 	U key;
-// 	keyType(U s){key=s;}
-// 	keyType(){}
-// 	bool operator<(keyType<U> s){
-// 		this->key < s.key;
-// 	};
-// };
-
-// template<class T>
-// class Tree{
-// 	std::vector<keyType > keys;
-// public:
-// 	Tree(){};
-// 	void add(T s){
-// 		keys.push_back(s);
-// 	}
-// };
 
 
 
@@ -54,15 +34,7 @@ struct BTNode
         IndexArray child;
 }; 
 
-// struct Pair
-// {
-//         keyType element;
-//         int loffset;
-//         int roffset;
-//         friend bool operator < (const Pair& p1, const Pair& p2)
-//            { return (p1.element < p2.element);  }
-// };
-template<class keyType>
+template<class keyType>//template should let it be of any type, so we can reuse this for more than just the album class
 class BTree
 {
  public:
@@ -73,16 +45,35 @@ class BTree
 		this->rootAddr = 0;
 		this->height = 0;
 		this->size=1;
+		this->numReads = 0;
+		this->numWrites = 0;
 		for(int i=0; i<MAX_CHILDREN; i++){
 			this->root.child[i]=-1;
 		}
 		printf("\n\n");
 	}
-	
+	//write out header and initialize filepointer
 	void writeHeader (char * fileName){
 		strcpy(this->treeFileName, fileName);
 		this->treeFile = new fstream(fileName, ios::in | ios::out | ios::binary);
+		this->treeFile->seekg(ios_base::beg);
+		this->treeFile->write((char*) &this->rootAddr, sizeof(this->rootAddr));
+		this->treeFile->write((char*) &this->height, sizeof(this->height));
+		this->treeFile->write((char*) &this->size, sizeof(this->size));
+
+
 		// putNode(this->rootAddr, this->root);
+	}
+	//read in header and root node to get basic b-tree set up and intialize file pointer
+	void readInTree(char * fileName){
+		strcpy(this->treeFileName, fileName);
+		this->treeFile = new fstream(fileName, ios::in | ios::out | ios::binary);
+		this->treeFile->seekg(ios_base::beg);
+		this->treeFile->read((char*) &this->rootAddr, sizeof(this->rootAddr));
+		this->treeFile->read((char*) &this->height, sizeof(this->height));
+		this->treeFile->read((char*) &this->size, sizeof(this->size));
+		this->root = getNode(this->rootAddr);
+
 	}
 	
 	void insert (keyType key){
@@ -103,7 +94,7 @@ class BTree
 		if(split){
 			cout<<"Now Adjusting Root!"<<endl;
 			this->height++;
-			BTNode<keyType> newRoot;
+			BTNode<keyType> newRoot;//swap the root for the newRoot
 			newRoot.currSize=1;
 			newRoot.contents[0] = key;
 			newRoot.child[0] = this->rootAddr;
@@ -118,48 +109,41 @@ class BTree
 			// for(int i=0;i<ORDER;i++){
 			// 	printf("child[%d]: %d    ",i,this->root.child[i]);
 			// }
+			this->treeFile->seekg(ios_base::beg);
+			this->treeFile->write((char*) &this->rootAddr, sizeof(this->rootAddr));//need to rewrite the header part if we change the root
+			this->treeFile->write((char*) &this->height, sizeof(this->height));
+			this->treeFile->write((char*) &this->size, sizeof(this->size));
 		}
 	}
 	
-	void reset (char * filename){
-
-	}
-	
-	void close (){
-
-	}
-	
-	void printTree(){
+	void printTree(){//prints tree (preorder)
 		printTree(this->rootAddr);
 	}
 	
-	void inorder(){
+	void inorder(){//prints tree inorder
 		inorder(this->rootAddr);
-	}
-	
-	void reverse(){
-
 	}
 	
 	int getHeight(){
 		return this->height;
 	}
 	
-	bool search (string key){
+	bool search (string key){//recursive search
 		return search(key, this->root, this->rootAddr);
 	}
 	
-	keyType retrieve (string key){
-
+	void changeNodeContents(keyType &key){
+		bool b = changeNodeContents(key, this->root ,this->rootAddr, key.getStringKey());//returns RecAddr as the address of node we want, and spot as the spot in contents array
+		if(!b){
+			printf("Invalid attempt to change, key not found\n");
+		}
+	}
+	void totalio(int arr[2]){
+		arr[0] = this->numReads;
+		arr[1] = this->numWrites;
+		return;
 	}
 	
-	void totalio() const{
-
-	}
-	
-	int countLeaves(){
-
-	}
 	// bool search (keyType key);
 	// void print (ostream &);
 	// void print (ostream &, int nodeAddr, int level);
@@ -173,10 +157,12 @@ class BTree
 	fstream * treeFile;
 	int height;
 	int size;
+	int numReads;
+	int numWrites;
 
 	
 
-
+//print tree, preorder
 void printTree (int rootAddr){
 	BTNode<keyType> temp = getNode(rootAddr);
 	printNode(rootAddr);
@@ -188,6 +174,7 @@ void printTree (int rootAddr){
 	}
 
 }
+//print tree, inorder
 void inorder (int addr){
 	BTNode<keyType> temp = getNode(addr);
 	for(int i=0;i<temp.currSize;i++){
@@ -203,16 +190,11 @@ void inorder (int addr){
 		inorder(temp.child[temp.currSize]);//check the last child (to the right of last content)
 	}
 }
-void reverse (int rootAddr){
-
-}
-int findAddr (keyType key, BTNode<keyType> t, int tAddr){
-
-}
-int findpAddr(keyType key, BTNode<keyType> t, int tAddr){
-
-}
-
+//try to insert the node going recursuvely down until we find the right spot (will always be a leaf)
+//if we need to split, split then move p and check it we need to split
+//if we do, split and continue returning up
+//returns key as the key that goes to the root, newNodeAddr as the new right node
+//And returns split as a boolean if we need to split again as we go up
 void insert(keyType &key, int currAddr, bool &split, int &newNodeAddr){
 	if(isLeaf(currAddr)){
 		// printf("LEAF\t");
@@ -333,15 +315,18 @@ void insert(keyType &key, int currAddr, bool &split, int &newNodeAddr){
 	}
 }
 
-
+//pull the node from saved place
 BTNode<keyType> getNode (int recAddr){
+	this->numReads++;
 	// printf("getNode(%d) myNode.currSize: ",recAddr);
 	BTNode<keyType> *myNode = new BTNode<keyType>();
-	this->treeFile->seekp(ios_base::beg + recAddr*sizeof(BTNode<keyType>));
+	this->treeFile->seekp(ios_base::beg + sizeof(this->size)+sizeof(this->height)+sizeof(this->rootAddr) + recAddr*sizeof(BTNode<keyType>));
 	this->treeFile->read((char*) myNode, sizeof(BTNode<keyType>));
 	// printf("%d\n",myNode->currSize);
 	return *myNode;
 }
+
+//print this single node
 void printNode(int recAddr){
 	
 	BTNode<keyType> current = getNode(recAddr);
@@ -355,13 +340,12 @@ void printNode(int recAddr){
 	}
 
 }
-void placeNode (keyType k,int currAddr,int oneAddr,int twoAddr){
-
-}
+//put the node into its spot, may overwrite
 void putNode(int recAddr, BTNode<keyType> node){
 	// printf("putNode, node.currSize: %d, %d\n",recAddr,node.currSize);
-	this->treeFile->seekg(ios_base::beg + recAddr*sizeof(BTNode<keyType>));
+	this->treeFile->seekg(ios_base::beg + sizeof(this->size)+sizeof(this->height)+sizeof(this->rootAddr) + recAddr*sizeof(BTNode<keyType>));
 	this->treeFile->write((char*) &node, sizeof(BTNode<keyType>));
+	this->numWrites++;
 }
 //Check if the given node is a leaf
 bool isLeaf (int recAddr){
@@ -381,12 +365,8 @@ bool isLeaf(BTNode<keyType> t){
 
 	return true;
 }
-int countLeaves(int recAddr){
 
-}
-void adjRoot (keyType rootElem, int oneAddr, int twoAddr){
-
-}
+//Split the node we are on, return the right node's address as newNodeAddr, and the key that goes to root as key
 void splitNode (keyType& key,int recAddr, int &newNodeAddr){
 	printf("Now Splitting!\n");
 	BTNode<keyType> currentNode = getNode(recAddr);
@@ -447,7 +427,7 @@ void splitNode (keyType& key,int recAddr, int &newNodeAddr){
 //recursively search through children to find node that matches key, or return false
 //returns true if string key is found
 bool search (string key, BTNode<keyType> t, int tAddr){
-	if(isLeaf(t)){
+	if(isLeaf(t)){//base case
 		for(int i=0;i<t.currSize;i++){//go through all children
 			int k = strcmp(t.contents[i].getStringKey().c_str(), key.c_str());
 			if(k==0)//strings are equal
@@ -456,8 +436,8 @@ bool search (string key, BTNode<keyType> t, int tAddr){
 				return false;
 		}
 	}
-	else{
-		for(int i=0; i<t.currSize; i++){//go through all children
+	else{//recursive case
+		for(int i=0; i<t.currSize; i++){//go through all contents and children
 			int k = strcmp(t.contents[i].getStringKey().c_str(), key.c_str());
 			if(k == 0)//strings are equal
 				return true;
@@ -470,6 +450,42 @@ bool search (string key, BTNode<keyType> t, int tAddr){
 		}
 		return false;
 	}
+	return false;
+
+}
+bool changeNodeContents (keyType key, BTNode<keyType> t, int tAddr, string keyString){
+	if(isLeaf(t)){//base case
+		for(int i=0;i<t.currSize;i++){//go through all children
+			int k = strcmp(t.contents[i].getStringKey().c_str(), keyString.c_str());
+			if(k==0){//strings are equal
+				t.contents[i] = key;//change contents
+				// cout<<t.contents[i]<<endl;
+				putNode(tAddr, t);
+				return true;
+			}
+			else if(k > 0)//content's key is larger, so no need to keep searching since we passed the location it should be
+				return false;
+		}
+	}
+	else{//recursive case
+		for(int i=0; i<t.currSize; i++){//go through all contents and children
+			int k = strcmp(t.contents[i].getStringKey().c_str(), keyString.c_str());
+			if(k == 0){//strings are equal
+				t.contents[i] = key;//change contents over
+				// cout<<t.contents[i]<<endl;
+				putNode(tAddr, t);
+				return true;
+			}
+			else if(k >0)//contents key is larger
+				return changeNodeContents(key, getNode(t.child[i]), t.child[i], keyString);//check child to left		
+		}
+		//We didn't find it in between any of the current contents, its too large so must be to the right of last one
+		if(t.child[t.currSize] > 0){//if there is a child node to the right
+			return changeNodeContents(key, getNode(t.child[t.currSize]), t.child[t.currSize], keyString);//check child to right
+		}
+		return false;
+	}
+	return false;
 
 }
 

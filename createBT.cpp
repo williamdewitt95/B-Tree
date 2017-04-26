@@ -33,19 +33,19 @@ int main(int c, char * v[]){
 	bt->writeHeader(v[2]);
 	while(infile){
 		Album temp;
-		infile>>temp;
-		if(!infile)
+		infile>>temp;//read in the new album
+		if(!infile)//don't try to insert a record after file pointer is dead
 			break;
 		// cout<<temp<<endl;
-		bt->insert(temp);
+		bt->insert(temp);//insert the album
 		// bt->printTree();
 		// printf("\n\n\n\n\n");
 	}
 	printf("\n\n\n\n~~~~~~~~~~~~~~B-tree of height %d~~~~~~~~~~~~~~~~~~\n\n\n\n",bt->getHeight());
 
-	bt->printTree();
-	// bt->insert(a);
-	// bt->inorder();
+	bt->printTree();//print the tree (preorder)
+	printf("\n\n\n\n");
+	
 	return 0;
 
 

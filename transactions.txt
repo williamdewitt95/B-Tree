@@ -1,0 +1,28 @@
+i
+0
+Jesse Mercer
+GO BEARS!
+c
+0
+Person A
+Album Name
+s
+1
+.
+.
+i
+909
+Best Artist
+Best Album
+s
+909
+Best Artist
+Best Album
+c
+909
+Worst Artist
+Worst Album
+s
+909
+.
+.

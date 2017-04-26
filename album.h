@@ -25,4 +25,13 @@ class Album
    private :
        String Key, Artist, Title;
 };
+
+enum TransactionType {Insert, Change, Search};
+
+struct transaction_Album
+{
+  TransactionType type;
+  Album album;
+};
+
 #endif
